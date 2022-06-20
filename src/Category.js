@@ -1,5 +1,6 @@
 import React from "react";
 import Product from "./Product.js";
+import { productAmountQuery } from "./queries.js";
 
 class Category extends React.Component {
 	constructor(props) {
@@ -7,27 +8,11 @@ class Category extends React.Component {
 		this.state = {
 			productAmountQuery: []
 		};
-		this.productAmountQuery();
+		this.productAmountSetup();
 	};
 	
-	productAmountQuery = async () => {
-		const res = await fetch('http://localhost:4000/', {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				query: `{
-					category {
-						products {
-							id
-							category
-						}
-					}
-				}`
-			})
-		});
-		const res_1 = await res.json();
+	productAmountSetup = async () => {
+		const res_1 = await productAmountQuery();
 		this.setState({
 			productAmountQuery: res_1.data.category.products
 		});
@@ -42,7 +27,7 @@ class Category extends React.Component {
 			products = JSON.parse(JSON.stringify((this.state.productAmountQuery)));
 		};
 		for (let x = 0; x < products.length; x++) {
-			productList.push(<Product key={products[x].id} productID={products[x].id} {...this.props} />);
+			productList.push(<Product key={products[x].id} productID={products[x].id} image={products[x].gallery[0]} name={products[x].name} inStock={products[x].inStock} brand={products[x].brand} prices={products[x].prices} attributes={products[x].attributes} {...this.props} />);
 		};
 		return productList;
 	};

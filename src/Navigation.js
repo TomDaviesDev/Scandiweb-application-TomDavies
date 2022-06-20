@@ -1,4 +1,5 @@
 import React from "react";
+import { categoriesQuery } from "./queries";
 
 class Navigation extends React.Component {
 	constructor(props) {
@@ -6,24 +7,11 @@ class Navigation extends React.Component {
 		this.state = {
 			categoriesQuery: []
 		};
-		this.categoriesQuery();
+		this.categoriesSetup();
 	};
 	
-	categoriesQuery = async () => {
-		const res = await fetch('http://localhost:4000/', {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				query: `{
-					categories {
-						name
-					}
-				}`
-			})
-		});
-		const res_1 = await res.json();
+	categoriesSetup = async () => {
+		const res_1 = await categoriesQuery();
 		this.setState({
 			categoriesQuery: res_1.data.categories.map(category => category.name.toUpperCase())
 		});

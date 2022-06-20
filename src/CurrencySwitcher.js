@@ -1,6 +1,7 @@
 import React from "react";
-import downArrow from "./down-arrow.png";
-import upArrow from "./up-arrow.png";
+import downArrow from "./images/down-arrow.png";
+import upArrow from "./images/up-arrow.png";
+import { pricesQuery } from "./queries";
 
 class CurrencySwitcher extends React.Component {
 	constructor(props) {
@@ -9,31 +10,11 @@ class CurrencySwitcher extends React.Component {
 			active: false,
 			pricesQuery: []
 		};
-		this.pricesQuery();
+		this.pricesSetup();
 	};
 	
-	pricesQuery = async () => {
-		const res = await fetch('http://localhost:4000/', {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				query: `{
-					category {
-						products {
-							prices {
-								currency {
-									label
-									symbol
-								}
-							}
-						}
-					}
-				}`
-			})
-		});
-		const res_1 = await res.json();
+	pricesSetup = async () => {
+		const res_1 = await pricesQuery();
 		this.setState({
 			pricesQuery: res_1.data.category.products.map(product => product.prices)[0]
 		});

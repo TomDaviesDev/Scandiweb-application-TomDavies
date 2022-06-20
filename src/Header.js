@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "./a-logo.png";
+import logo from "./images/a-logo.png";
 import Navigation from "./Navigation.js";
 import Actions from "./Actions.js";
 

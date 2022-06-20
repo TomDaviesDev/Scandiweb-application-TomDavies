@@ -1,6 +1,7 @@
 import React from "react";
-import leftArrow from "./left-arrow.png";
-import rightArrow from "./right-arrow.png";
+import leftArrow from "./images/left-arrow.png";
+import rightArrow from "./images/right-arrow.png";
+import { cartProductQuery } from "./queries";
 
 class CartProduct extends React.Component {
 	constructor(props) {
@@ -10,47 +11,11 @@ class CartProduct extends React.Component {
 			displayImage: "",
 			imageIndex: 0
 		}
-		this.cartProductQuery();
+		this.cartProductSetup();
 	};
 	
-	cartProductQuery = async () => {
-		const query = `
-			query($id: String!) {
-				product (id: $id) {
-					gallery
-					attributes {
-						id
-						name
-						type
-						items {
-							displayValue
-							value
-							id
-						}
-					}
-					prices {
-						currency {
-							label
-							symbol
-						}
-						amount
-					}
-				}
-			}
-		`;
-		const res = await fetch('http://localhost:4000/', {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				query,
-				variables: {
-					id: this.props.product.productID
-				}
-			})
-		});
-		const res_1 = await res.json();
+	cartProductSetup = async () => {
+		const res_1 = await cartProductQuery(this.props.product.productID);
 		this.setState({
 			cartProductQuery: res_1.data.product,
 			displayImage: res_1.data.product.gallery[0]
@@ -112,7 +77,7 @@ class CartProduct extends React.Component {
 		if (prices) {
 			const correctPrice = prices.find(price => price.currency.label === selectedCurrency);
 			const amount = correctPrice.amount;
-			return this.props.symbol + amount;
+			return this.props.symbol + amount.toFixed(2);
 		};
 	};
 	

@@ -3,6 +3,7 @@ import Header from "./Header.js";
 import Category from "./Category.js"
 import ProductDescription from "./ProductDescription.js";
 import CartPage from "./CartPage.js";
+import { initialStateQuery } from "./queries.js";
 
 class App extends React.Component {
 	constructor(props) {
@@ -22,30 +23,7 @@ class App extends React.Component {
 	};
 	
 	initialState = async () => {
-		const res = await fetch('http://localhost:4000/', {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				query: `{
-					category {
-						name
-						products {
-							id
-							prices {
-								currency {
-									label
-									symbol
-								}
-								amount
-							}
-						}
-					}
-				}`
-			})
-		});
-		const res_1 = await res.json();
+		const res_1 = await initialStateQuery();
 		this.setState({
 			productPrices: res_1.data.category.products
 		});
@@ -94,10 +72,10 @@ class App extends React.Component {
 		}, this.localStoragePage(page));
 	};
 	
-	productUpdate = (product) => { //Passed down to update product state.
+	productUpdate = (id) => { //Passed down to update product state.
 		this.setState({
-			product: product
-		}, this.localStorageProduct(product));
+			product: id
+		}, this.localStorageProduct(id));
 	};
 	
 	cartUpdate = (id, brand, name, attributes) => { //Passed down to update shopping cart.
@@ -164,6 +142,13 @@ class App extends React.Component {
 				cartQuantity: cartTotal,
 				page: "category",
 				product: ""
+			},
+			this.localStorageCartQuantity(cartTotal),
+			this.localStoragePage("category"),
+			this.localStorageProduct(""));
+		} else {
+			this.setState({
+				cartQuantity: cartTotal
 			}, this.localStorageCartQuantity(cartTotal));
 		};
 	};

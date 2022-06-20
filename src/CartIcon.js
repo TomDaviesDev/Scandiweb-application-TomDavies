@@ -1,5 +1,5 @@
 import React from "react";
-import cartLogo from "./empty-cart.png";
+import cartLogo from "./images/empty-cart.png";
 import CartOverlay from "./CartOverlay.js";
 
 class CartIcon extends React.Component {

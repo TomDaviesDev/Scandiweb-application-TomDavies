@@ -455,12 +455,12 @@ body {
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: row;
-	justify-content: center;
+	justify-content: left;
 	align-items: center;
 }
 
 .product-container {
-	width: 33%;
+	width: 480px;
 	justify-content: center;
 	align-items: center;
 }
@@ -494,7 +494,7 @@ body {
 
 .out-of-stock-text {
 	position: absolute;
-	top: 40%;
+	top: 45%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	color: #8D8F9A; /*Value taken directly from the design, but the text is unreadable on the Xbox picture with this colour.*/
@@ -557,6 +557,9 @@ body {
 .product-description-preview-gallery {
 	display: flex;
 	flex-direction: column;
+	max-height: 550px;
+	overflow-y: auto;
+	direction: rtl;
 }
 
 .preview-gallery-image {
@@ -566,7 +569,9 @@ body {
 }
 
 .product-description-preview-image-div {
-	margin: 0 1%
+	position: relative;
+	margin: 0 1%;
+	height: fit-content;
 }
 
 .preview-image {
@@ -574,6 +579,22 @@ body {
 	width: 610px;
 	padding: 8px 20px;
 	object-fit: contain;
+}
+
+.preview-image.out-of-stock {
+	opacity: 0.5;
+}
+
+.preview-image-out-of-stock-text {
+	position: absolute;
+	top: 45%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	color: #8D8F9A;
+	font-weight: 400;
+	font-size: 24px;
+	line-height: 160%;
+	text-shadow: 1px 1px 0px black; /*Shadow added to make text readable on similar coloured images*/
 }
 
 .product-description-div {

@@ -1,21 +1,28 @@
 import React from "react";
 import { Markup } from 'interweave';
+import { productQuery } from "./queries";
 
 class ProductDescription extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			selectedImage: this.props.product.gallery[0],
+			product: {},
+			selectedImage: "",
 			selectedAttributes: []
 		};
+		this.productSetup();
 	};
 	
-	componentDidMount = () => {
-		this.initAttributes();
+	productSetup = async () => {
+		const res_1 = await productQuery(this.props.product);
+		this.setState({
+			product: res_1.data.product,
+			selectedImage: res_1.data.product.gallery[0]
+		}, this.initAttributes);
 	};
 	
 	initAttributes = () => { //Sets up initial template for selectedAttributes state, ensuring the correct amount of attributes are expected.
-		const attributes = this.props.product.attributes;
+		const attributes = this.state.product.attributes;
 		let attributesState = [];
 		for (let x = 0; x < attributes.length; x++) {
 			attributesState.push({name: attributes[x].id, value: undefined});
@@ -26,10 +33,10 @@ class ProductDescription extends React.Component {
 	};
 	
 	previewGalleryRender = () => { //Handles rendering of preview gallery.
-		const productGallery = this.props.product.gallery;
+		const productGallery = this.state.product.gallery;
 		let previewGallery = [];
 		if (productGallery) {
-			for (let x = 0; x < 3; x++) { //Preview gallery limited to 3 items per advice (if I've misunderstood, it will be easy to add a scroll mechanism).
+			for (let x = 0; x < productGallery.length; x++) {
 				if (productGallery[x]) {
 					previewGallery.push(<div key={productGallery[x]}>
 						<img src={productGallery[x]} alt="Preview of item" className="preview-gallery-image" tabIndex={1} key={x} onKeyDown={(event) => this.keyPressGallery(event, productGallery[x])} onClick={() => this.imageUpdate(productGallery[x])}></img>
@@ -47,7 +54,7 @@ class ProductDescription extends React.Component {
 	};
 	
 	attributeRender = () => { //Handles rendering of title and container for each attribute.
-		const att = this.props.product.attributes;
+		const att = this.state.product.attributes;
 		let display = [];
 		if (att) {
 			for (let x = 0; x < att.length; x++) {
@@ -90,12 +97,6 @@ class ProductDescription extends React.Component {
 		};
 	};
 	
-	keyPressAddToCart = (event) => { //Applies onClick effect if the Enter key is pressed for accessibility purposes when selecting the Add to Cart button.
-		if (event.key === "Enter") {
-			this.addToCart();
-		};
-	};
-	
 	attributeSelect = (att, value, event) => { //Updates selected attribute on page and updates state.
 		const activeElements = event.target.parentElement.getElementsByClassName("selected-attribute");
 		for (let x = 0; x < activeElements.length; x++) {
@@ -113,21 +114,21 @@ class ProductDescription extends React.Component {
 	
 	priceRender = () => { //Handles rendering the correct price based on the user selected currency.
 		const selectedCurrency = this.props.currency; 
-		const prices = this.props.product.prices;
+		const prices = this.state.product.prices;
 		if (prices) {
 			const correctPrice = prices.find(price => price.currency.label === selectedCurrency);
 			const amount = correctPrice.amount;
-			return amount;
+			return amount.toFixed(2);
 		};
 	};
 	
 	cartButtonRender = () => { //Handles conditional rendering of the Add to Cart button.
-		if (this.props.product.inStock) {
+		if (this.state.product.inStock) {
 			const attributes = this.state.selectedAttributes;
 			if (attributes.some(att => att.value === undefined)) {
 				return <input type="button" className="product-description-add-to-cart-button disabled" value="ADD TO CART" tabIndex={1}></input>
 			} else {
-				return <input type="button" className="product-description-add-to-cart-button" value="ADD TO CART" tabIndex={1} onKeyDown={(event) => this.keyPressAddToCart(event)} onClick={() => this.addToCart()}></input>
+				return <input type="button" className="product-description-add-to-cart-button" value="ADD TO CART" tabIndex={1} onClick={() => this.addToCart()}></input>
 			};
 		} else {
 			return <input type="button" className="product-description-add-to-cart-button disabled" value="OUT OF STOCK" tabIndex={1}></input>
@@ -135,13 +136,11 @@ class ProductDescription extends React.Component {
 	};
 	
 	addToCart = () => { //Passes properties up to App to be added to cart, and resets to the category page.
-		const id = this.props.product.id;
-		const brand = this.props.product.brand;
-		const name = this.props.product.name;
+		const id = this.state.product.id;
+		const brand = this.state.product.brand;
+		const name = this.state.product.name;
 		const attributes = this.state.selectedAttributes;
 		this.props.cartUpdateHandler(id, brand, name, attributes);
-		this.props.productUpdateHandler("");
-		this.props.pageUpdateHandler("category");
 	};
 	
 	render() {
@@ -149,15 +148,24 @@ class ProductDescription extends React.Component {
 			<div className="product-description-preview-gallery">
 				{this.previewGalleryRender()}
 			</div>
-			<div className="product-description-preview-image-div">
-				<img src={this.state.selectedImage} alt={this.props.product.name} className="preview-image"></img>
-			</div>
+			{this.state.product.inStock === true ? 
+				<div className="product-description-preview-image-div">
+					<img src={this.state.selectedImage} alt={this.state.product.name} className="preview-image"></img>
+				</div>
+				:
+				<div className="product-description-preview-image-div">
+					<img src={this.state.selectedImage} alt={this.state.product.name} className="preview-image out-of-stock"></img>
+					<div className="preview-image-out-of-stock-text-div">
+						<div className="preview-image-out-of-stock-text">OUT OF STOCK</div>
+					</div>
+				</div>
+			}
 			<div className="product-description-div">
 				<div className="product-description-brand">
-					{this.props.product.brand}
+					{this.state.product.brand}
 				</div>
 				<div className="product-description-name">
-					{this.props.product.name}
+					{this.state.product.name}
 				</div>
 				<div>
 					{this.attributeRender()}
@@ -173,7 +181,7 @@ class ProductDescription extends React.Component {
 					{this.cartButtonRender()}
 				</div>
 				<div className="product-description-text" id="description" tabIndex={1}>
-					<Markup content={this.props.product.description} />
+					<Markup content={this.state.product.description} />
 				</div>
 			</div>
 		</div>
